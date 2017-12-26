@@ -28,7 +28,7 @@ missmap(training.data.raw, main = "Missing values vs observed")
 ```
 * 計算每個欄位空值的數量
 * 檢查每個欄位值的變化
-* 顯示空值圖
+* 顯示欄位空值圖
 
 #### 選擇變數欄
 ```{R}
@@ -46,8 +46,8 @@ data$Age[is.na(data$Age)] <- mean(data$Age,na.rm=T)
 ```{R}
 is.factor(data$Sex)
 is.factor(data$Embarked)
-contrasts(data$Sex)
-data <- data[!is.na(data$Embarked),]
+contrasts(data$Sex) #將data$set轉換成two-level factor
+data <- data[!is.na(data$Embarked),] #將Embarked欄位為空值的資料消除
 rownames(data) = NULL
 ```
 #### 訓練模型
@@ -66,6 +66,19 @@ fitted.results <- predict(model,newdata=subset(test,select=c(2,3,4,5,6,7,8)),typ
 fitted.results <- ifelse(fitted.results > 0.5,1,0)
 misClasificError <- mean(fitted.results != test$Survived)
 print(paste('Accuracy',1-misClasificError))
+```
+```{R}
+library(ROCR)
+p <- predict(model, newdata=subset(test,select=c(2,3,4,5,6,7,8)), type="response")
+pr <- prediction(p, test$Survived)
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+```
+ROC(Receiver Operating Characteristic) 圖是針對true positive rate(TPR)及false positive rate(FPR)，AUC是ROC圖所涵蓋的面積
+```{R}
+auc <- performance(pr, measure = "auc")
+auc <- auc@y.values[[1]]
+auc
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
