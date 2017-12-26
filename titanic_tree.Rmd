@@ -25,12 +25,16 @@ sapply(training.data.raw,function(x) sum(is.na(x)))
 sapply(training.data.raw, function(x) length(unique(x)))
 library(Amelia)
 missmap(training.data.raw, main = "Missing values vs observed")
-
 ```
+* 計算每個欄位空值的數量
+* 檢查每個欄位值的變化
+* 顯示空值圖
+
 #### 選擇變數欄
 ```{R}
 data <- subset(training.data.raw,select=c(2,3,5,6,7,8,10,12))
 ```
+選擇2, 3, 5, 6, 7, 8, 10, 12欄位資料組成資料檔
 
 #### 處理Age遺失值
 ```{R}
