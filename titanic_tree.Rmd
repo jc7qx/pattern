@@ -1,0 +1,84 @@
+---
+title: "logictic"
+author: "鍾健雄"
+date: "2017/12/26"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 前言
+
+## Logistic Regression 原理
+
+## 案例分析
+### Titanic Data
+```{R}
+setwd("/Users/CSIEK503/desktop/rtest/regression/titanic")
+training.data.raw <- read.csv('train.csv',header=T,na.strings=c(""))
+str(training.data.raw)
+View(training.data.raw)
+```
+### 資料清理
+
+```{R}
+sapply(training.data.raw,function(x) sum(is.na(x)))
+sapply(training.data.raw, function(x) length(unique(x)))
+library(Amelia)
+missmap(training.data.raw, main = "Missing values vs observed")
+
+```
+### 選擇變數欄
+```{R}
+data <- subset(training.data.raw,select=c(2,3,5,6,7,8,10,12))
+```
+
+### 處理Age遺失值
+```{R}
+data$Age[is.na(data$Age)] <- mean(data$Age,na.rm=T)
+```
+
+### 編碼
+```{R}
+is.factor(data$Sex)
+is.factor(data$Embarked)
+contrasts(data$Sex)
+data <- data[!is.na(data$Embarked),]
+rownames(data) = NULL
+```
+### 訓練模型
+```{R}
+train <- data[1:800,]
+test <- data[801:889,]
+model <- glm(Survived ~.,family=binomial(link='logit'),data=train)
+summary(model)
+anova(model, test="Chisq")
+library(pscl)
+pR2(model)
+```
+### 測試模型
+```{R}
+fitted.results <- predict(model,newdata=subset(test,select=c(2,3,4,5,6,7,8)),type='response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+misClasificError <- mean(fitted.results != test$Survived)
+print(paste('Accuracy',1-misClasificError))
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
